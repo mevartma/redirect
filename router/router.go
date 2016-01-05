@@ -17,7 +17,7 @@ func NewMux() http.Handler {
 }
 
 func addurl(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprint(w, "ADD New URL")
+	//	fmt.Fprint(w, "ADD New URL")
 }
 func allurl(w http.ResponseWriter, r *http.Request) {
 	res, err := db.GetAllUrls()
