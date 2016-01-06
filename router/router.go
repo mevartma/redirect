@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
 	"net/http"
 	"proxy/db"
 	"proxy/model"
@@ -12,10 +13,20 @@ import (
 )
 
 func NewMux() http.Handler {
+	addu := http.HandlerFunc(addurl)
+	getu := http.HandlerFunc(allurl)
 	Rmux := mux.NewRouter()
-	Rmux.HandleFunc("/api/v1/addurl", addurl).Methods("POST")
-	Rmux.HandleFunc("/api/v1/allurl", allurl).Methods("GET")
+	Rmux.Handle("/api/v1/addurl", loggerMiddleware(addu)).Methods("POST")
+	Rmux.Handle("/api/v1/allurl", loggerMiddleware(getu)).Methods("GET")
+	Rmux.PathPrefix("/").Handler(loggerMiddleware(http.FileServer(http.Dir("/root/go/src/proxy/html/"))))
 	return Rmux
+}
+
+func loggerMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		log.Printf("%s [%s] %s [%s] [%s]", r.RemoteAddr, r.Method, r.Header.Get("User-Agent"), r.URL, r.Host)
+		next.ServeHTTP(w, r)
+	})
 }
 
 func addurl(w http.ResponseWriter, r *http.Request) {
